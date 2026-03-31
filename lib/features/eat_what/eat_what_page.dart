@@ -6,6 +6,7 @@ import '../../core/providers/settings_provider.dart';
 import '../../core/utils/ui_text_scale.dart';
 import '../../core/widgets/app_button.dart';
 import '../../core/widgets/app_card.dart';
+import '../common/tool_scaffold.dart';
 import 'providers.dart';
 
 class EatWhatPage extends ConsumerStatefulWidget {
@@ -36,37 +37,31 @@ class _EatWhatPageState extends ConsumerState<EatWhatPage> {
     final notifier = ref.read(eatWhatProvider.notifier);
     final ui = ref.watch(settingsProvider);
 
-    return Scaffold(
-      appBar: AppBar(title: const Text('今天吃什么')),
-      body: Padding(
-        padding: const EdgeInsets.all(AppSpacing.md),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            AppCard(
-              child: TextField(
-                controller: _controller,
-                minLines: 5,
-                maxLines: 8,
-                decoration: const InputDecoration(
-                  hintText: '每行一个候选菜品',
-                  border: InputBorder.none,
-                ),
-                onChanged: notifier.setOptions,
-              ),
+    return ToolScaffold(
+      toolId: 'eat_what',
+      children: [
+        AppCard(
+          child: TextField(
+            controller: _controller,
+            minLines: 5,
+            maxLines: 8,
+            decoration: const InputDecoration(
+              hintText: '每行一个候选菜品',
+              border: InputBorder.none,
             ),
-            const SizedBox(height: AppSpacing.lg),
-            AppButton(label: '帮我选一道', onPressed: notifier.suggest),
-            const SizedBox(height: AppSpacing.lg),
-            AppCard(
-              child: Text(
-                state.suggestion,
-                style: scaledTextStyle(Theme.of(context).textTheme.headlineSmall, ui.textScaleFactor),
-              ),
-            ),
-          ],
+            onChanged: notifier.setOptions,
+          ),
         ),
-      ),
+        const SizedBox(height: AppSpacing.lg),
+        AppButton(label: '帮我选一道', onPressed: notifier.suggest),
+        const SizedBox(height: AppSpacing.lg),
+        AppCard(
+          child: Text(
+            state.suggestion,
+            style: scaledTextStyle(Theme.of(context).textTheme.headlineSmall, ui.textScaleFactor),
+          ),
+        ),
+      ],
     );
   }
 }

@@ -7,6 +7,7 @@ import '../../core/utils/ui_text_scale.dart';
 import '../../core/widgets/app_button.dart';
 import '../../core/widgets/app_card.dart';
 import '../../core/widgets/app_input.dart';
+import '../common/tool_scaffold.dart';
 import 'providers.dart';
 
 class RmbUppercasePage extends ConsumerStatefulWidget {
@@ -37,34 +38,28 @@ class _RmbUppercasePageState extends ConsumerState<RmbUppercasePage> {
     final notifier = ref.read(rmbUppercaseProvider.notifier);
     final ui = ref.watch(settingsProvider);
 
-    return Scaffold(
-      appBar: AppBar(title: const Text('大小写金额')),
-      body: Padding(
-        padding: const EdgeInsets.all(AppSpacing.md),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            AppCard(
-              child: AppInput(
-                label: '金额',
-                hint: '例如 1234.56',
-                controller: _controller,
-                keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                onChanged: (value) => notifier.setAmount(double.tryParse(value) ?? 0),
-              ),
-            ),
-            const SizedBox(height: AppSpacing.lg),
-            AppButton(label: '转换为大写金额', onPressed: notifier.convert),
-            const SizedBox(height: AppSpacing.lg),
-            AppCard(
-              child: SelectableText(
-                state.output.isEmpty ? '等待转换结果' : state.output,
-                style: scaledTextStyle(Theme.of(context).textTheme.bodyLarge, ui.textScaleFactor),
-              ),
-            ),
-          ],
+    return ToolScaffold(
+      toolId: 'rmb_uppercase',
+      children: [
+        AppCard(
+          child: AppInput(
+            label: '金额',
+            hint: '例如 1234.56',
+            controller: _controller,
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            onChanged: (value) => notifier.setAmount(double.tryParse(value) ?? 0),
+          ),
         ),
-      ),
+        const SizedBox(height: AppSpacing.lg),
+        AppButton(label: '转换为大写金额', onPressed: notifier.convert),
+        const SizedBox(height: AppSpacing.lg),
+        AppCard(
+          child: SelectableText(
+            state.output.isEmpty ? '等待转换结果' : state.output,
+            style: scaledTextStyle(Theme.of(context).textTheme.bodyLarge, ui.textScaleFactor),
+          ),
+        ),
+      ],
     );
   }
 }
