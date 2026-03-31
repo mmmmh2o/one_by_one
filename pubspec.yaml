@@ -30,6 +30,7 @@ dependencies:
   connectivity_plus: ^6.0.0
   package_info_plus: ^8.0.0
   flutter_tts: ^3.0.0
+  dynamic_color: ^1.7.0
 
 dev_dependencies:
   flutter_test:

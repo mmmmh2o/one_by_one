@@ -35,6 +35,7 @@ class SettingsState {
   final UiPreset currentPreset;
   final UiShadowLevel shadowLevel;
   final bool highContrast;
+  final bool monetEnabled;
 
   const SettingsState({
     required this.locale,
@@ -51,6 +52,7 @@ class SettingsState {
     required this.currentPreset,
     required this.shadowLevel,
     required this.highContrast,
+    required this.monetEnabled,
   });
 
   SettingsState copyWith({
@@ -68,6 +70,7 @@ class SettingsState {
     UiPreset? currentPreset,
     UiShadowLevel? shadowLevel,
     bool? highContrast,
+    bool? monetEnabled,
   }) {
     return SettingsState(
       locale: locale ?? this.locale,
@@ -84,6 +87,7 @@ class SettingsState {
       currentPreset: currentPreset ?? this.currentPreset,
       shadowLevel: shadowLevel ?? this.shadowLevel,
       highContrast: highContrast ?? this.highContrast,
+      monetEnabled: monetEnabled ?? this.monetEnabled,
     );
   }
 }
@@ -103,6 +107,7 @@ const _defaultSettings = SettingsState(
   currentPreset: UiPreset.custom,
   shadowLevel: UiShadowLevel.soft,
   highContrast: false,
+  monetEnabled: false,
 );
 
 abstract class _SettingsKeys {
@@ -119,6 +124,7 @@ abstract class _SettingsKeys {
   static const currentPreset = 'ui.current_preset';
   static const shadowLevel = 'ui.shadow_level';
   static const highContrast = 'ui.high_contrast';
+  static const monetEnabled = 'ui.monet_enabled';
 }
 
 class SettingsNotifier extends StateNotifier<SettingsState> {
@@ -150,6 +156,7 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
       currentPreset: _presetFrom(prefs.getInt(_SettingsKeys.currentPreset) ?? state.currentPreset.index),
       shadowLevel: _shadowFrom(prefs.getInt(_SettingsKeys.shadowLevel) ?? state.shadowLevel.index),
       highContrast: prefs.getBool(_SettingsKeys.highContrast) ?? state.highContrast,
+      monetEnabled: prefs.getBool(_SettingsKeys.monetEnabled) ?? state.monetEnabled,
     );
     state = hydrated;
   }
@@ -169,6 +176,7 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
     await prefs.setInt(_SettingsKeys.currentPreset, state.currentPreset.index);
     await prefs.setInt(_SettingsKeys.shadowLevel, state.shadowLevel.index);
     await prefs.setBool(_SettingsKeys.highContrast, state.highContrast);
+    await prefs.setBool(_SettingsKeys.monetEnabled, state.monetEnabled);
   }
 
   void _setState(SettingsState next, {bool markCustom = true}) {
@@ -236,6 +244,10 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
 
   void setHighContrast(bool enabled) {
     _setState(state.copyWith(highContrast: enabled));
+  }
+
+  void setMonetEnabled(bool enabled) {
+    _setState(state.copyWith(monetEnabled: enabled));
   }
 
   void applyPreset(UiPreset preset) {
