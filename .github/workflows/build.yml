@@ -1,0 +1,220 @@
+name: Build & Release
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main, master, develop ]
+    tags: [ "v*" ]
+    paths-ignore:
+      - '**/*.md'
+      - 'docs/**'
+  pull_request:
+    branches: [ main ]
+    paths-ignore:
+      - '**/*.md'
+      - 'docs/**'
+  schedule:
+    - cron: '0 3 * * *'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  FLUTTER_VERSION: "3.41.5"
+
+permissions:
+  contents: read
+
+jobs:
+  check-platforms:
+    name: 🧱 Check Flutter Platform Dirs
+    runs-on: ubuntu-latest
+    outputs:
+      has_android: ${{ steps.detect.outputs.has_android }}
+      has_web: ${{ steps.detect.outputs.has_web }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: detect
+        name: Detect platform directories
+        shell: bash
+        run: |
+          if [ -d android ]; then
+            echo "has_android=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_android=false" >> "$GITHUB_OUTPUT"
+          fi
+
+          if [ -d web ]; then
+            echo "has_web=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_web=false" >> "$GITHUB_OUTPUT"
+          fi
+
+  bootstrap-warning:
+    name: ℹ️ Bootstrap Warning
+    needs: check-platforms
+    runs-on: ubuntu-latest
+    if: needs.check-platforms.outputs.has_android != 'true' || needs.check-platforms.outputs.has_web != 'true'
+    steps:
+      - name: Print guidance for incomplete Flutter project
+        run: |
+          echo "This repository is missing one or more Flutter platform directories."
+          echo "Expected at least: android/ and web/ for current workflow jobs."
+          echo "CI will auto-bootstrap missing platform folders before build steps."
+          echo "See docs/flutter-project-bootstrap.md for details."
+
+  cleanup-artifacts:
+    name: 🧹 Clean Old Artifacts
+    if: github.event_name == 'schedule' || github.event_name == 'push'
+    runs-on: ubuntu-latest
+    permissions:
+      actions: write
+      contents: read
+    steps:
+      - name: Delete old workflow artifacts
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const DAYS_TO_KEEP = 2;
+            const cutoff = new Date(Date.now() - DAYS_TO_KEEP * 24 * 60 * 60 * 1000);
+            let page = 1;
+            let deleted = 0;
+            while (true) {
+              const { data } = await github.rest.actions.listArtifactsForRepo({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                per_page: 100,
+                page,
+              });
+              if (data.artifacts.length === 0) break;
+              for (const artifact of data.artifacts) {
+                if (new Date(artifact.created_at) < cutoff) {
+                  await github.rest.actions.deleteArtifact({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    artifact_id: artifact.id,
+                  });
+                  deleted++;
+                }
+              }
+              page++;
+            }
+            console.log(`Artifacts cleanup done. Deleted ${deleted}.`);
+
+      - name: Delete old workflow runs
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const DAYS_TO_KEEP = 7;
+            const cutoff = new Date(Date.now() - DAYS_TO_KEEP * 24 * 60 * 60 * 1000);
+            let page = 1;
+            let deleted = 0;
+            while (true) {
+              const { data } = await github.rest.actions.listWorkflowRunsForRepo({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                per_page: 100,
+                page,
+              });
+              if (data.workflow_runs.length === 0) break;
+              for (const run of data.workflow_runs) {
+                if (new Date(run.created_at) < cutoff && run.status === 'completed') {
+                  await github.rest.actions.deleteWorkflowRun({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    run_id: run.id,
+                  });
+                  deleted++;
+                }
+              }
+              page++;
+            }
+            console.log(`Runs cleanup done. Deleted ${deleted}.`);
+
+  analyze:
+    name: 🔍 Analyze & Test
+    if: github.event_name != 'schedule'
+    needs: check-platforms
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+      - name: Cache Dart dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            .dart_tool/
+            build/
+          key: dart-${{ runner.os }}-${{ hashFiles('pubspec.yaml') }}
+          restore-keys: dart-${{ runner.os }}-
+      - run: flutter pub get
+      - run: flutter analyze --no-fatal-infos
+        continue-on-error: true
+      - run: flutter test
+
+  build-android:
+    name: 🤖 Android APK
+    needs: check-platforms
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: zulu
+          java-version: '17'
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+      - name: Cache Gradle
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: gradle-${{ runner.os }}-${{ hashFiles('android/**/gradle-wrapper.properties', 'android/**/*.gradle*', 'android/**/settings.gradle*') }}
+          restore-keys: gradle-${{ runner.os }}-
+      - name: Bootstrap Android platform when missing
+        if: needs.check-platforms.outputs.has_android != 'true'
+        run: flutter create . --platforms=android
+      - run: flutter pub get
+      - run: flutter build apk --debug
+      - name: Upload Android artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-apk-debug
+          path: build/app/outputs/flutter-apk/app-debug.apk
+          if-no-files-found: error
+          retention-days: 2
+
+  build-web:
+    name: 🌐 Web
+    needs: check-platforms
+    if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+      - name: Bootstrap Web platform when missing
+        if: needs.check-platforms.outputs.has_web != 'true'
+        run: flutter create . --platforms=web
+      - run: flutter pub get
+      - run: flutter build web --release
+      - name: Upload Web artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: web-release
+          path: build/web
+          if-no-files-found: error
+          retention-days: 2

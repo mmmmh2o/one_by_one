@@ -1,0 +1,36 @@
+# Flutter / Dart
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub/
+build/
+
+# Platform outputs
+android/.gradle/
+android/local.properties
+ios/Pods/
+ios/.symlinks/
+macos/Pods/
+linux/flutter/ephemeral/
+windows/flutter/ephemeral/
+
+# IDE / editor
+.idea/
+.vscode/
+*.iml
+
+# Logs / temp
+*.log
+*.tmp
+
+# Environment / secrets
+.env
+*.env.local
+opencode.json
+android/app/*.jks
+android/key.properties
+
+# OS files
+.DS_Store
+Thumbs.db
