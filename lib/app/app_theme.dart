@@ -21,7 +21,7 @@ abstract class AppTheme {
         backgroundColor: Colors.transparent,
         foregroundColor: AppColors.onSurface,
       ),
-      cardTheme: CardTheme(
+      cardTheme: CardThemeData(
         elevation: 0,
         color: AppColors.surface,
         shape: RoundedRectangleBorder(
@@ -58,7 +58,7 @@ abstract class AppTheme {
       colorScheme: ColorScheme.fromSeed(seedColor: seed, brightness: Brightness.dark),
       scaffoldBackgroundColor: const Color(0xFF101511),
       appBarTheme: const AppBarTheme(centerTitle: false, elevation: 0),
-      cardTheme: CardTheme(
+      cardTheme: CardThemeData(
         elevation: 0,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(settings.cardRadius),
