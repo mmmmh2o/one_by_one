@@ -1,5 +1,5 @@
 name: toolbox
-description: "轻量级多工具集"‍
+description: "轻量级多工具集"
 publish_to: "none"
 version: 0.1.0+1
 environment:
