@@ -1,0 +1,88 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../../core/constants/spacing.dart';
+import '../../core/providers/settings_provider.dart';
+import '../../core/utils/ui_text_scale.dart';
+import '../../core/widgets/app_button.dart';
+import '../../core/widgets/app_card.dart';
+import 'providers.dart';
+
+class UrlCodecPage extends ConsumerStatefulWidget {
+  const UrlCodecPage({super.key});
+
+  @override
+  ConsumerState<UrlCodecPage> createState() => _UrlCodecPageState();
+}
+
+class _UrlCodecPageState extends ConsumerState<UrlCodecPage> {
+  late final TextEditingController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final state = ref.watch(urlCodecProvider);
+    final notifier = ref.read(urlCodecProvider.notifier);
+    final ui = ref.watch(settingsProvider);
+
+    return Scaffold(
+      appBar: AppBar(title: const Text('URL 编解码')),
+      body: Padding(
+        padding: const EdgeInsets.all(AppSpacing.md),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            AppCard(
+              child: TextField(
+                controller: _controller,
+                minLines: 5,
+                maxLines: 8,
+                decoration: const InputDecoration(
+                  hintText: '输入 URL 或参数文本',
+                  border: InputBorder.none,
+                ),
+                onChanged: notifier.setInput,
+              ),
+            ),
+            const SizedBox(height: AppSpacing.md),
+            Row(
+              children: [
+                Expanded(child: AppButton(label: '编码', onPressed: notifier.encode)),
+                const SizedBox(width: AppSpacing.sm),
+                Expanded(child: AppButton(label: '解码', onPressed: notifier.decode, isPrimary: false)),
+              ],
+            ),
+            const SizedBox(height: AppSpacing.lg),
+            AppCard(
+              child: state.error != null
+                  ? Text(
+                      state.error!,
+                      style: scaledTextStyle(
+                        Theme.of(context).textTheme.bodyLarge?.copyWith(
+                              color: Theme.of(context).colorScheme.error,
+                            ),
+                        ui.textScaleFactor,
+                      ),
+                    )
+                  : SelectableText(
+                      state.output.isEmpty ? '等待处理结果' : state.output,
+                      style: scaledTextStyle(Theme.of(context).textTheme.bodyLarge, ui.textScaleFactor),
+                    ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
