@@ -162,6 +162,19 @@ jobs:
           key: dart-${{ runner.os }}-${{ hashFiles('pubspec.yaml') }}
           restore-keys: dart-${{ runner.os }}-
       - run: flutter pub get
+      - name: 🔒 Verify logic layer purity (no Flutter imports)
+        shell: bash
+        run: |
+          violations=$(grep -rn "package:flutter/" lib/features/*/logic/ 2>/dev/null || true)
+          if [ -n "$violations" ]; then
+            echo "::error::Logic 层禁止 import flutter 包："
+            echo "$violations"
+            echo ""
+            echo "Logic 层应为纯 Dart（仅允许 dart:core, dart:math, dart:convert 等标准库）。"
+            echo "请将 Flutter 依赖移到 providers.dart 或 page 层。"
+            exit 1
+          fi
+          echo "✅ Logic 层纯 Dart 检查通过（$(ls lib/features/*/logic/*.dart | wc -l) 个文件）"
       - run: flutter analyze --no-fatal-infos
         continue-on-error: true
       - name: Run tests
