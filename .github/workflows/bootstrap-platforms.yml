@@ -1,0 +1,46 @@
+name: Bootstrap Flutter Platforms
+
+on:
+  workflow_dispatch:
+    inputs:
+      platforms:
+        description: 'Comma-separated platforms (e.g. android,web)'
+        required: true
+        default: 'android,web'
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  bootstrap:
+    name: Generate platform folders and open PR
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.41.5'
+          cache: true
+
+      - name: Generate platform folders
+        run: flutter create . --platforms=${{ github.event.inputs.platforms }}
+
+      - name: Format generated Dart files
+        run: dart format .
+
+      - name: Create pull request
+        uses: peter-evans/create-pull-request@v7
+        with:
+          commit-message: 'chore: bootstrap flutter platforms'
+          title: 'chore: bootstrap flutter platforms'
+          body: |
+            ## Summary
+            - generate Flutter platform folders via CI
+            - target platforms: `${{ github.event.inputs.platforms }}`
+            - improve build speed and stability for GitHub Actions
+          branch: ci/bootstrap-platforms
+          delete-branch: true

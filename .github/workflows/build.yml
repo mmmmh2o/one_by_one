@@ -140,6 +140,15 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
+      - id: detect-tests
+        name: Detect test files
+        shell: bash
+        run: |
+          if compgen -G "test/**/*_test.dart" > /dev/null || compgen -G "test/*_test.dart" > /dev/null; then
+            echo "has_tests=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_tests=false" >> "$GITHUB_OUTPUT"
+          fi
       - uses: subosito/flutter-action@v2
         with:
           flutter-version: ${{ env.FLUTTER_VERSION }}
@@ -155,7 +164,12 @@ jobs:
       - run: flutter pub get
       - run: flutter analyze --no-fatal-infos
         continue-on-error: true
-      - run: flutter test
+      - name: Run tests
+        if: steps.detect-tests.outputs.has_tests == 'true'
+        run: flutter test
+      - name: Skip tests (none found)
+        if: steps.detect-tests.outputs.has_tests != 'true'
+        run: echo "No *_test.dart files found under test/. Skipping flutter test."
 
   build-android:
     name: 🤖 Android APK

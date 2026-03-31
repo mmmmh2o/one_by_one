@@ -43,6 +43,12 @@ flutter create . --platforms=android,web
 ./scripts/bootstrap.ps1 -GeneratePlatforms
 ```
 
+如果你只在云端操作，也可用 GitHub Actions 手动触发：
+
+- 工作流：`Bootstrap Flutter Platforms`
+- 输入：`platforms=android,web`
+- 结果：自动生成平台目录并创建 PR（分支：`ci/bootstrap-platforms`）
+
 如果担心覆盖现有业务代码，可以先备份，再执行。
 
 ## 补齐后需要检查
