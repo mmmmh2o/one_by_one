@@ -128,9 +128,14 @@ abstract class _SettingsKeys {
 }
 
 class SettingsNotifier extends StateNotifier<SettingsState> {
+  final _hydrationCompleter = Completer<void>();
+
   SettingsNotifier() : super(_defaultSettings) {
     unawaited(_hydrate());
   }
+
+  /// 等待本地配置加载完成（启动时用）
+  Future<void> waitForHydration() => _hydrationCompleter.future;
 
   ThemeMode _themeModeFrom(int index) => ThemeMode.values[index.clamp(0, ThemeMode.values.length - 1)];
   UiDensity _densityFrom(int index) => UiDensity.values[index.clamp(0, UiDensity.values.length - 1)];
@@ -159,6 +164,9 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
       monetEnabled: prefs.getBool(_SettingsKeys.monetEnabled) ?? state.monetEnabled,
     );
     state = hydrated;
+    if (!_hydrationCompleter.isCompleted) {
+      _hydrationCompleter.complete();
+    }
   }
 
   Future<void> _persist() async {

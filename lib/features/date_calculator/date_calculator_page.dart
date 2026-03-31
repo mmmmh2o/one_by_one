@@ -49,7 +49,7 @@ class _DatePickerRow extends StatelessWidget {
     final mm = value.month.toString().padLeft(2, '0');
     final dd = value.day.toString().padLeft(2, '0');
     return InkWell(onTap: onTap, borderRadius: BorderRadius.circular(8), child: Ink(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.md - 2),
       decoration: BoxDecoration(borderRadius: BorderRadius.circular(8), border: Border.all(color: Theme.of(context).dividerColor.withValues(alpha: 0.4))),
       child: Row(children: [Expanded(child: Text('$label：${value.year}-$mm-$dd', style: Theme.of(context).textTheme.bodyLarge)), const Icon(Icons.calendar_month)]),
     ));

@@ -1,4 +1,4 @@
-# 🧰 工具箱 — Flutter 开发规范
+# 🧰 工具箱 - Flutter 开发规范
 
 > 版本：v1.0 | 日期：2026-03-30
 > 目标：构建一个轻量、模块化、可扩展的多工具集合 App
@@ -99,12 +99,19 @@ lib/
 ```
 features/<tool_name>/
 ├── logic/                        # 纯 Dart 业务逻辑（零 Flutter 依赖）
-│   ├── <tool>.dart               # 核心算法/转换/处理
-│   └── models.dart               # 枚举/数据结构
+│   └── <logic_file>.dart         # 核心算法/转换/处理（可含枚举/模型）
 ├── providers.dart                # Riverpod 状态管理（桥接层）
-├── widgets/                      # UI 组件
-│   └── ...
-└── <tool_name>_page.dart         # 主页面
+├── <tool_name>_page.dart         # 主页面
+└── widgets/                      # （可选）复杂子组件拆分
+```
+
+**实际示例（calculator）：**
+```
+features/calculator/
+├── logic/
+│   └── calculator_engine.dart    # CalcOperator 枚举 + CalculatorEngine 类
+├── providers.dart                # CalculatorState + CalculatorNotifier
+└── calculator_page.dart          # ConsumerStatefulWidget 页面
 ```
 
 ### 3.2 三层职责速查
@@ -310,10 +317,13 @@ final goRouter = GoRouter(
 
 ### 7.1 设计原则
 
-- **参考 Material Design 3**，采用简洁清晰的视觉风格
-- **主色调**：绿色系（如 `#4CAF50`）或自选品牌色
-- **圆角统一**：卡片 `12px`，按钮 `8px`，输入框 `8px`
-- **间距系统**：4 的倍数（4, 8, 12, 16, 24, 32, 48）
+- **严格遵循 Material Design 3 (MD3)**：使用 `useMaterial3: true`、`ColorScheme.fromSeed()` 派生色。
+- **语义化颜色**：UI 必须使用 `Theme.of(context).colorScheme.*`，禁止硬编码 `Color(0x...)`。
+- **间距系统**：统一使用 `AppSpacing` 常量（4/8/16/24/32/48），禁止裸数字。
+- **圆角统一**：通过 `settings.cardRadius` 动态控制，不要在组件内写死。
+- **文字缩放**：所有工具结果文案必须用 `scaledTextStyle()` 包裹，读取 `settings.textScaleFactor`。
+- **深色模式**：所有页面必须同时适配亮色和暗色主题。
+- **图标容器**：工具图标统一用 `primaryContainer` 色调容器包裹，保持视觉一致。
 
 ### 7.2 间距常量
 
@@ -332,87 +342,72 @@ abstract class AppSpacing {
 
 ### 7.3 通用组件
 
-```dart
-// core/widgets/
+当前已实现的通用组件，位于 `lib/core/widgets/` 和 `lib/features/common/`：
 
-app_button.dart       // 统一按钮样式
-app_card.dart         // 统一卡片样式
-app_input.dart        // 统一输入框
-app_divider.dart      // 分割线
-loading_indicator.dart // 加载状态
-empty_state.dart      // 空状态占位
-error_widget.dart     // 错误状态
-tool_grid_item.dart   // 工具网格卡片（首页用）
-```
+| 组件 | 路径 | 用途 |
+|------|------|------|
+| `ToolScaffold` | `features/common/tool_scaffold.dart` | 统一工具页外壳（AppBar + padding） |
+| `AppCard` | `core/widgets/app_card.dart` | 统一卡片容器 |
+| `AppInput` | `core/widgets/app_input.dart` | 统一输入框 |
+| `AppButton` | `core/widgets/app_button.dart` | 统一按钮 |
+| `scaledTextStyle` | `core/utils/ui_text_scale.dart` | 响应文字缩放 |
+
+**新增工具页面必须使用 `ToolScaffold` + `AppCard` + `AppButton`，禁止自行搭 Scaffold。**
 
 ### 7.4 工具卡片组件
 
-```dart
-// core/widgets/tool_grid_item.dart
+首页工具卡片（`_ToolGridCard` / `_ToolListTile`）已内置在 `home_page.dart`，新工具无需自定义首页卡片。
 
-class ToolGridItem extends StatelessWidget {
-  final ToolEntry tool;
-  final VoidCallback onTap;
+---
 
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surface,
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(tool.icon, size: 32),
-            const SizedBox(height: AppSpacing.sm),
-            Text(tool.name, style: Theme.of(context).textTheme.bodyMedium),
-          ],
-        ),
-      ),
-    );
-  }
-}
+## 7.5 启动性能优化（强制）
+
+### 启动路径
+
 ```
+main()
+  ├── WidgetsFlutterBinding.ensureInitialized()
+  ├── ProviderContainer() → 预加载 settingsProvider hydration
+  ├── await waitForHydration()  ← 阻塞，仅等 SharedPreferences（~5ms）
+  └── UncontrolledProviderScope → App → MaterialApp.router
+```
+
+### 规则
+
+1. **Settings 必须等 hydration 完成再渲染**：使用 `UncontrolledProviderScope` + `waitForHydration()`，避免首帧闪屏（默认主题 → 用户主题）。
+2. **Provider 懒加载**：非首页依赖的 Provider 使用 `autoDispose`，避免启动时初始化所有状态。
+3. **DynamicColorBuilder 非阻塞**：莫奈取色是平台异步回调，不影响首帧。
+4. **路由懒加载**：GoRouter 默认按需构建页面，不要预加载所有工具页面。
+5. **禁止在 main() 中做 IO**：除 settings hydration 外，其他 IO（网络、数据库）必须异步。
+
+### 首屏渲染时序
+
+```
+T+0ms    main() 开始
+T+10ms   WidgetsFlutterBinding 初始化
+T+20ms   SharedPreferences 读取（~5ms on modern devices）
+T+25ms   Settings hydration → 用用户配置渲染首帧
+T+30ms   MaterialApp.router 构建
+T+40ms   首帧渲染（HomePage + SliverAppBar + SearchBar）
+T+50ms   DynamicColorBuilder 回调（仅莫奈用户，无感知切换）
+```
+
+**目标：冷启动到首帧 < 100ms（不含 Flutter engine init）。**
 
 ---
 
 ## 八、主题规范
 
-```dart
-// app/theme.dart
+主题由 `AppTheme.light(settings, {monetScheme})` / `AppTheme.dark(settings, {monetScheme})` 动态生成。
 
-class AppTheme {
-  static ThemeData light = ThemeData(
-    useMaterial3: true,
-    colorScheme: ColorScheme.fromSeed(
-      seedColor: const Color(0xFF4CAF50),
-      brightness: Brightness.light,
-    ),
-    appBarTheme: const AppBarTheme(
-      centerTitle: true,
-      elevation: 0,
-    ),
-    cardTheme: CardTheme(
-      elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
-    ),
-  );
+核心特性：
+- `useMaterial3: true`，全面使用 `ColorScheme` 派生色。
+- 支持莫奈取色（`dynamic_color` 包）：Android 12+ 壁纸动态取色。
+- 支持三套种子色（green/ocean/amber）手动切换。
+- `scrolledUnderElevation` 自动提升（滚动时 AppBar 阴影）。
+- `SearchBarThemeData` / `ChipThemeData` / `BottomSheetThemeData` 统一配色。
 
-  static ThemeData dark = ThemeData(
-    useMaterial3: true,
-    colorScheme: ColorScheme.fromSeed(
-      seedColor: const Color(0xFF4CAF50),
-      brightness: Brightness.dark,
-    ),
-    // ...
-  );
-}
-```
+**禁止在工具页面硬编码颜色，必须使用 `Theme.of(context).colorScheme.*`。**
 
 ---
 
@@ -505,14 +500,14 @@ chore: 升级 Flutter SDK 到 3.24
 ```
 
 类型前缀：
-- `feat` — 新功能
-- `fix` — 修复
-- `refactor` — 重构
-- `docs` — 文档
-- `style` — 格式（不影响逻辑）
-- `perf` — 性能优化
-- `test` — 测试
-- `chore` — 构建/工具
+- `feat` - 新功能
+- `fix` - 修复
+- `refactor` - 重构
+- `docs` - 文档
+- `style` - 格式（不影响逻辑）
+- `perf` - 性能优化
+- `test` - 测试
+- `chore` - 构建/工具
 
 ### 10.3 .gitignore
 
@@ -698,22 +693,29 @@ PR 合并前审查项：
 
 ---
 
-## 十七、当前落地进展（2026-03-31）
+## 十七、当前落地进展（2026-04-01）
 
-- 已完成 24 个工具首版并沿用三层架构：`ruler`、`random_number`、`dice`、`unit_converter`、`coin`、`base_converter`、`date_calculator`、`calculator`、`bmi`、`json_formatter`、`morse`、`rmb_uppercase`、`random_string`、`base64_codec`、`url_codec`、`text_stats`、`text_dedup_sort`、`decision_maker`、`unicode_codec`、`text_compare`、`fullscreen_clock`、`eat_what`、`regex_tester`、`palette_generator`。
-- 已形成可复用模板：
-  - 通用页结构：`lib/features/common/tool_page_template.dart`
-  - 通用输入/卡片/按钮：`lib/core/widgets/app_input.dart`、`lib/core/widgets/app_card.dart`、`lib/core/widgets/app_button.dart`
-  - 工具注册与路由接入：`lib/core/registry/tool_registry.dart` + `/tool/:id`
-- 规则提醒：后续新增工具必须沿用以上模板，禁止从页面复制粘贴后“魔改分叉”，优先扩展参数实现复用。
-- 仓库结构已按 GitHub 同步场景整理：增加 `.github/workflows/build.yml`、`README.md`、`docs/`、`.gitignore`、`assets/`、`test/` 占位目录。
-- GitHub 同步与 Flutter 平台补齐说明已独立沉淀到 `docs/repo-sync-checklist.md` 与 `docs/flutter-project-bootstrap.md`，后续提交前必须对照检查。
+### 已完成
+- **24 个工具首版**，全部遵循三层架构：`logic/`（纯Dart）→ `providers.dart`（Riverpod）→ `*_page.dart`（UI）。
+- **MD3 主界面**：SliverAppBar.large 可折叠标题栏 + SearchBar 实时过滤 + FilterChip 分类筛选 + 分组视图 + 最近使用/收藏横向区 + 网格/列表切换 + 卡片按压缩放动效 + 长按上下文菜单。
+- **莫奈取色**：`dynamic_color` 包接入，Android 12+ 壁纸取色，设置面板开关。
+- **收藏 & 最近使用**：SharedPreferences 持久化，首页展示，长按收藏。
+- **启动优化**：Settings hydration 完成后再渲染首帧，避免主题闪屏。
+- **UI 自定义系统**：主题/密度/强调色/圆角/动画/文字缩放/图标缩放/网格列数/阴影/高对比/预设方案，全部持久化。
+- **通用模板**：`ToolScaffold` + `AppCard` + `AppButton` + `AppInput` + `scaledTextStyle`。
+- **CI/CD**：GitHub Actions 构建工作流 + 平台目录自动检测。
+- **仓库治理**：README / docs / .github / .gitignore / analysis_options.yaml。
+
+### 待完成
+- 测试覆盖（单元测试 / Widget 测试）
+- Phase 2 工具开发
+- 首页文件拆分（home_page.dart 999 行 → 拆分 SettingsSheet 和卡片组件）
 
 ---
 
 ## 十八、UI 规范增强（自定义选项）
 
-为满足不同用户偏好，UI 层新增“可配置外观”规范：
+为满足不同用户偏好，UI 层新增"可配置外观"规范：
 
 - **主题模式**：支持 `system/light/dark` 切换。
 - **界面密度**：支持 `comfortable/compact`，影响网格间距、输入与卡片留白。
@@ -736,7 +738,7 @@ PR 合并前审查项：
 
 - 所有配置统一存放在 `core/providers/settings_provider.dart`。
 - 主题必须由 `AppTheme.light(settings)` / `AppTheme.dark(settings)` 动态生成。
-- 首页提供可视化“UI 自定义”入口用于实时预览配置效果。
+- 首页提供可视化"UI 自定义"入口用于实时预览配置效果。
 - 新增页面不得绕开全局设置单独写死视觉参数。
 - `ToolPageTemplate` 必须受 `enableAnimations` 控制，不允许页面自行硬编码动画时长。
 
@@ -847,7 +849,7 @@ themeMode: settings.themeMode,
 - **分阶段开发**：优先按 `Phase 1-5` 批次推进，提交/PR 描述需标注所属 Phase（例：`Phase 1 - 单位换算`）。
 - **分支规范补充**：针对单个工具使用 `feature/<tool_id>`（如 `feature/ruler`），跨工具 Phase 任务可用 `phase/<n>-batch`。
 - **Issue/PR 关联**：每个工具开发对应一条任务记录；PR 描述包含：工具名、状态更新、是否离线/会员、依赖包变更、测试范围。
-- **Checklist 对齐**：新增工具时同时勾选本规范的“新增工具 Checklist”和 `FEATURE_TRACKER.md` 的状态，缺一不可。
+- **Checklist 对齐**：新增工具时同时勾选本规范的"新增工具 Checklist"和 `FEATURE_TRACKER.md` 的状态，缺一不可。
 - **度量与验收**：
   - MVP（Phase 1-2）必须满足：冷启动 < 1s、包体 < 15MB、核心流程全量测试。
   - 在线类工具必须写明所用 API、鉴权方式、速率限制，并在备注标记 Mock/真实环境。
