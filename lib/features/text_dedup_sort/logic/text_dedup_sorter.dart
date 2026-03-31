@@ -10,6 +10,8 @@ class TextDedupSortResult {
   });
 }
 
+import '../../../core/utils/text_lines.dart';
+
 class TextDedupSorter {
   const TextDedupSorter();
 
@@ -18,11 +20,7 @@ class TextDedupSorter {
     bool ascending = true,
     bool ignoreCase = false,
   }) {
-    final lines = input
-        .split('\n')
-        .map((e) => e.trim())
-        .where((e) => e.isNotEmpty)
-        .toList();
+    final lines = input.nonEmptyTrimmedLines;
 
     final map = <String, String>{};
     for (final line in lines) {

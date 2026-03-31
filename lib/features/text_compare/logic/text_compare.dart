@@ -6,12 +6,14 @@ class TextCompareResult {
   const TextCompareResult({required this.onlyA, required this.onlyB, required this.both});
 }
 
+import '../../../core/utils/text_lines.dart';
+
 class TextCompare {
   const TextCompare();
 
   TextCompareResult compare(String a, String b) {
-    final setA = a.split('\n').map((e) => e.trim()).where((e) => e.isNotEmpty).toSet();
-    final setB = b.split('\n').map((e) => e.trim()).where((e) => e.isNotEmpty).toSet();
+    final setA = a.nonEmptyTrimmedLines.toSet();
+    final setB = b.nonEmptyTrimmedLines.toSet();
     return TextCompareResult(
       onlyA: setA.difference(setB),
       onlyB: setB.difference(setA),
