@@ -1,4 +1,4 @@
-import 'dart:ui';
+import 'package:flutter/painting.dart';
 
 class PaletteGenerator {
   const PaletteGenerator();
