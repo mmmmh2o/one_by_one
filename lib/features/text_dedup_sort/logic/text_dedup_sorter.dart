@@ -1,3 +1,5 @@
+import '../../../core/utils/text_lines.dart';
+
 class TextDedupSortResult {
   final String output;
   final int totalLines;
@@ -9,8 +11,6 @@ class TextDedupSortResult {
     required this.uniqueLines,
   });
 }
-
-import '../../../core/utils/text_lines.dart';
 
 class TextDedupSorter {
   const TextDedupSorter();

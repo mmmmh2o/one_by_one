@@ -1,3 +1,5 @@
+import '../../../core/utils/text_lines.dart';
+
 class TextCompareResult {
   final Set<String> onlyA;
   final Set<String> onlyB;
@@ -5,8 +7,6 @@ class TextCompareResult {
 
   const TextCompareResult({required this.onlyA, required this.onlyB, required this.both});
 }
-
-import '../../../core/utils/text_lines.dart';
 
 class TextCompare {
   const TextCompare();
