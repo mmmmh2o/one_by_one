@@ -700,7 +700,7 @@ PR 合并前审查项：
 
 ## 十七、当前落地进展（2026-03-31）
 
-- 已完成 22 个工具首版并沿用三层架构：`ruler`、`random_number`、`dice`、`unit_converter`、`coin`、`base_converter`、`date_calculator`、`calculator`、`bmi`、`json_formatter`、`morse`、`rmb_uppercase`、`random_string`、`base64_codec`、`url_codec`、`text_stats`、`text_dedup_sort`、`decision_maker`、`unicode_codec`、`text_compare`、`fullscreen_clock`、`eat_what`。
+- 已完成 24 个工具首版并沿用三层架构：`ruler`、`random_number`、`dice`、`unit_converter`、`coin`、`base_converter`、`date_calculator`、`calculator`、`bmi`、`json_formatter`、`morse`、`rmb_uppercase`、`random_string`、`base64_codec`、`url_codec`、`text_stats`、`text_dedup_sort`、`decision_maker`、`unicode_codec`、`text_compare`、`fullscreen_clock`、`eat_what`、`regex_tester`、`palette_generator`。
 - 已形成可复用模板：
   - 通用页结构：`lib/features/common/tool_page_template.dart`
   - 通用输入/卡片/按钮：`lib/core/widgets/app_input.dart`、`lib/core/widgets/app_card.dart`、`lib/core/widgets/app_button.dart`

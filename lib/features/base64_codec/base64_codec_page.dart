@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter/services.dart';
 
 import '../../core/constants/spacing.dart';
 import '../../core/providers/settings_provider.dart';
@@ -61,6 +62,30 @@ class _Base64CodecPageState extends ConsumerState<Base64CodecPage> {
                 Expanded(child: AppButton(label: '编码', onPressed: notifier.encode)),
                 const SizedBox(width: AppSpacing.sm),
                 Expanded(child: AppButton(label: '解码', onPressed: notifier.decode, isPrimary: false)),
+              ],
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            Wrap(
+              spacing: AppSpacing.sm,
+              children: [
+                ActionChip(
+                  label: const Text('示例'),
+                  onPressed: () {
+                    const sample = 'hello toolbox';
+                    _controller.text = sample;
+                    notifier.setInput(sample);
+                  },
+                ),
+                ActionChip(
+                  label: const Text('复制结果'),
+                  onPressed: state.output.isEmpty
+                      ? null
+                      : () async {
+                          await Clipboard.setData(ClipboardData(text: state.output));
+                          if (!context.mounted) return;
+                          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('已复制')));
+                        },
+                ),
               ],
             ),
             const SizedBox(height: AppSpacing.lg),

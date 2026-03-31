@@ -12,8 +12,10 @@ import '../../features/eat_what/eat_what_page.dart';
 import '../../features/fullscreen_clock/fullscreen_clock_page.dart';
 import '../../features/json_formatter/json_formatter_page.dart';
 import '../../features/morse/morse_page.dart';
+import '../../features/palette_generator/palette_generator_page.dart';
 import '../../features/random/random_page.dart';
 import '../../features/random_string/random_string_page.dart';
+import '../../features/regex_tester/regex_tester_page.dart';
 import '../../features/rmb_uppercase/rmb_uppercase_page.dart';
 import '../../features/ruler/ruler_page.dart';
 import '../../features/text_compare/text_compare_page.dart';
@@ -244,6 +246,26 @@ final List<ToolEntry> allTools = [
     builder: (_) => const EatWhatPage(),
     isOffline: true,
     sortOrder: 22,
+  ),
+  ToolEntry(
+    id: 'regex_tester',
+    name: '正则测试器',
+    description: '测试正则表达式并查看匹配结果',
+    icon: Icons.rule,
+    category: ToolCategory.thirdParty,
+    builder: (_) => const RegexTesterPage(),
+    isOffline: true,
+    sortOrder: 23,
+  ),
+  ToolEntry(
+    id: 'palette_generator',
+    name: '配色方案生成',
+    description: '根据种子词生成多组可复制色板',
+    icon: Icons.palette,
+    category: ToolCategory.other,
+    builder: (_) => const PaletteGeneratorPage(),
+    isOffline: true,
+    sortOrder: 24,
   ),
 ];
 

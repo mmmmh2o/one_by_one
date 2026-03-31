@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter/services.dart';
 
 import '../../core/constants/spacing.dart';
 import '../../core/providers/settings_provider.dart';
@@ -86,6 +87,36 @@ class _RandomStringPageState extends ConsumerState<RandomStringPage> {
             ),
             const SizedBox(height: AppSpacing.lg),
             AppButton(label: '生成', onPressed: notifier.generate),
+            const SizedBox(height: AppSpacing.sm),
+            Wrap(
+              spacing: AppSpacing.sm,
+              children: [
+                ActionChip(
+                  label: const Text('长度 8'),
+                  onPressed: () {
+                    _lengthController.text = '8';
+                    notifier.setLength(8);
+                  },
+                ),
+                ActionChip(
+                  label: const Text('长度 16'),
+                  onPressed: () {
+                    _lengthController.text = '16';
+                    notifier.setLength(16);
+                  },
+                ),
+                ActionChip(
+                  label: const Text('复制结果'),
+                  onPressed: state.output.isEmpty
+                      ? null
+                      : () async {
+                          await Clipboard.setData(ClipboardData(text: state.output));
+                          if (!context.mounted) return;
+                          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('已复制')));
+                        },
+                ),
+              ],
+            ),
             const SizedBox(height: AppSpacing.lg),
             AppCard(
               child: state.error != null

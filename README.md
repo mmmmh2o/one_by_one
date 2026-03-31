@@ -6,7 +6,7 @@
 
 - 已完成项目基础骨架
 - 已接入首页、主题、UI 自定义能力
-- 已完成 22 个工具首版：`ruler`、`random_number`、`dice`、`unit_converter`、`coin`、`base_converter`、`date_calculator`、`calculator`、`bmi`、`json_formatter`、`morse`、`rmb_uppercase`、`random_string`、`base64_codec`、`url_codec`、`text_stats`、`text_dedup_sort`、`decision_maker`、`unicode_codec`、`text_compare`、`fullscreen_clock`、`eat_what`
+- 已完成 24 个工具首版：`ruler`、`random_number`、`dice`、`unit_converter`、`coin`、`base_converter`、`date_calculator`、`calculator`、`bmi`、`json_formatter`、`morse`、`rmb_uppercase`、`random_string`、`base64_codec`、`url_codec`、`text_stats`、`text_dedup_sort`、`decision_maker`、`unicode_codec`、`text_compare`、`fullscreen_clock`、`eat_what`、`regex_tester`、`palette_generator`
 - 已接入 GitHub Actions 构建工作流
 - 已补齐仓库治理基础文件（`analysis_options.yaml`、`scripts/`、`.github/ISSUE_TEMPLATE/`）
 
