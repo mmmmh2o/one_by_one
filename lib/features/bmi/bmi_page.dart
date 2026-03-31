@@ -7,6 +7,7 @@ import '../../core/utils/ui_text_scale.dart';
 import '../../core/widgets/app_button.dart';
 import '../../core/widgets/app_card.dart';
 import '../../core/widgets/app_input.dart';
+import '../common/tool_scaffold.dart';
 import 'logic/bmi_calculator.dart';
 import 'providers.dart';
 
@@ -41,72 +42,27 @@ class _BmiPageState extends ConsumerState<BmiPage> {
     final notifier = ref.read(bmiProvider.notifier);
     final ui = ref.watch(settingsProvider);
 
-    return Scaffold(
-      appBar: AppBar(title: const Text('BMI 计算')),
-      body: Padding(
-        padding: const EdgeInsets.all(AppSpacing.md),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            AppCard(
-              child: Column(
-                children: [
-                  AppInput(
-                    label: '身高 (cm)',
-                    controller: _heightController,
-                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                    onChanged: (value) => notifier.setHeight(double.tryParse(value) ?? 0),
-                  ),
-                  const SizedBox(height: AppSpacing.md),
-                  AppInput(
-                    label: '体重 (kg)',
-                    controller: _weightController,
-                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                    onChanged: (value) => notifier.setWeight(double.tryParse(value) ?? 0),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: AppSpacing.lg),
-            AppButton(label: '计算 BMI', onPressed: notifier.calculate),
-            const SizedBox(height: AppSpacing.lg),
-            AppCard(
-              child: state.result == null
-                  ? Text(
-                      '输入参数后点击计算',
-                      style: scaledTextStyle(Theme.of(context).textTheme.bodyMedium, ui.textScaleFactor),
-                    )
-                  : Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'BMI：${state.result!.value.toStringAsFixed(2)}',
-                          style: scaledTextStyle(Theme.of(context).textTheme.headlineSmall, ui.textScaleFactor),
-                        ),
-                        const SizedBox(height: AppSpacing.sm),
-                        Text(
-                          '分级：${_label(state.result!.category)}',
-                          style: scaledTextStyle(Theme.of(context).textTheme.bodyLarge, ui.textScaleFactor),
-                        ),
-                      ],
-                    ),
-            ),
-          ],
-        ),
-      ),
+    return ToolScaffold(
+      toolId: 'bmi',
+      children: [
+        AppCard(child: Column(children: [
+          AppInput(label: '身高 (cm)', controller: _heightController, keyboardType: const TextInputType.numberWithOptions(decimal: true), onChanged: (v) => notifier.setHeight(double.tryParse(v) ?? 0)),
+          const SizedBox(height: AppSpacing.md),
+          AppInput(label: '体重 (kg)', controller: _weightController, keyboardType: const TextInputType.numberWithOptions(decimal: true), onChanged: (v) => notifier.setWeight(double.tryParse(v) ?? 0)),
+        ])),
+        const SizedBox(height: AppSpacing.lg),
+        AppButton(label: '计算 BMI', onPressed: notifier.calculate),
+        const SizedBox(height: AppSpacing.lg),
+        AppCard(child: state.result == null
+            ? Text('输入参数后点击计算', style: scaledTextStyle(Theme.of(context).textTheme.bodyMedium, ui.textScaleFactor))
+            : Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Text('BMI：${state.result!.value.toStringAsFixed(2)}', style: scaledTextStyle(Theme.of(context).textTheme.headlineSmall, ui.textScaleFactor)),
+                const SizedBox(height: AppSpacing.sm),
+                Text('分级：${_label(state.result!.category)}', style: scaledTextStyle(Theme.of(context).textTheme.bodyLarge, ui.textScaleFactor)),
+              ])),
+      ],
     );
   }
 
-  String _label(BmiCategory category) {
-    switch (category) {
-      case BmiCategory.underweight:
-        return '偏瘦';
-      case BmiCategory.normal:
-        return '正常';
-      case BmiCategory.overweight:
-        return '超重';
-      case BmiCategory.obese:
-        return '肥胖';
-    }
-  }
+  String _label(BmiCategory c) => switch (c) { BmiCategory.underweight => '偏瘦', BmiCategory.normal => '正常', BmiCategory.overweight => '超重', BmiCategory.obese => '肥胖' };
 }

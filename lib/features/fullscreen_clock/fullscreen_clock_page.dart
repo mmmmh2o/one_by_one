@@ -5,6 +5,7 @@ import '../../core/constants/spacing.dart';
 import '../../core/providers/settings_provider.dart';
 import '../../core/utils/ui_text_scale.dart';
 import '../../core/widgets/app_card.dart';
+import '../common/tool_scaffold.dart';
 import 'logic/clock_formatter.dart';
 import 'providers.dart';
 
@@ -23,58 +24,25 @@ class FullscreenClockPage extends ConsumerWidget {
     final mm = state.now.minute.toString().padLeft(2, '0');
     final ss = state.now.second.toString().padLeft(2, '0');
     final period = hour < 12 ? 'AM' : 'PM';
-
     final timeText = state.is24Hour
         ? (state.showSeconds ? formatter.format(state.now) : '${hour.toString().padLeft(2, '0')}:$mm')
         : (state.showSeconds ? '${h12.toString().padLeft(2, '0')}:$mm:$ss $period' : '${h12.toString().padLeft(2, '0')}:$mm $period');
 
-    return Scaffold(
-      appBar: AppBar(title: const Text('全屏时钟')),
-      body: Padding(
-        padding: const EdgeInsets.all(AppSpacing.md),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Expanded(
-              child: AppCard(
-                child: Center(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        timeText,
-                        style: scaledTextStyle(Theme.of(context).textTheme.displayMedium, ui.textScaleFactor),
-                      ),
-                      const SizedBox(height: AppSpacing.sm),
-                      Text(
-                        formatter.formatDate(state.now),
-                        style: scaledTextStyle(Theme.of(context).textTheme.titleMedium, ui.textScaleFactor),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(height: AppSpacing.md),
-            AppCard(
-              child: Column(
-                children: [
-                  SwitchListTile.adaptive(
-                    title: const Text('24 小时制'),
-                    value: state.is24Hour,
-                    onChanged: notifier.set24Hour,
-                  ),
-                  SwitchListTile.adaptive(
-                    title: const Text('显示秒钟'),
-                    value: state.showSeconds,
-                    onChanged: notifier.setShowSeconds,
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
+    return ToolScaffold(
+      toolId: 'fullscreen_clock',
+      expandBody: true,
+      children: [
+        Expanded(child: AppCard(child: Center(child: Column(mainAxisSize: MainAxisSize.min, children: [
+          Text(timeText, style: scaledTextStyle(Theme.of(context).textTheme.displayMedium, ui.textScaleFactor)),
+          const SizedBox(height: AppSpacing.sm),
+          Text(formatter.formatDate(state.now), style: scaledTextStyle(Theme.of(context).textTheme.titleMedium, ui.textScaleFactor)),
+        ])))),
+        const SizedBox(height: AppSpacing.md),
+        AppCard(child: Column(children: [
+          SwitchListTile.adaptive(title: const Text('24 小时制'), value: state.is24Hour, onChanged: notifier.set24Hour),
+          SwitchListTile.adaptive(title: const Text('显示秒钟'), value: state.showSeconds, onChanged: notifier.setShowSeconds),
+        ])),
+      ],
     );
   }
 }
