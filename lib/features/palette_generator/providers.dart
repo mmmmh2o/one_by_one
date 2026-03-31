@@ -4,22 +4,35 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'logic/palette_generator.dart';
 
+/// 将纯 Dart RgbColor 转为 Flutter Color（转换只在 Provider 层发生）
+Color _toColor(RgbColor c) => Color.fromARGB(255, c.r, c.g, c.b);
+
 class PaletteGeneratorState {
   final String seed;
   final int count;
-  final List<Color> colors;
+  final List<RgbColor> rawColors;
 
   const PaletteGeneratorState({
     this.seed = 'toolbox',
     this.count = 6,
-    this.colors = const [],
+    this.rawColors = const [],
   });
 
-  PaletteGeneratorState copyWith({String? seed, int? count, List<Color>? colors}) {
+  /// UI 直接用的 Flutter Color 列表
+  List<Color> get colors => rawColors.map(_toColor).toList();
+
+  /// hex 字符串列表
+  List<String> get hexValues => rawColors.map((c) => c.toHex()).toList();
+
+  PaletteGeneratorState copyWith({
+    String? seed,
+    int? count,
+    List<RgbColor>? rawColors,
+  }) {
     return PaletteGeneratorState(
       seed: seed ?? this.seed,
       count: count ?? this.count,
-      colors: colors ?? this.colors,
+      rawColors: rawColors ?? this.rawColors,
     );
   }
 }
@@ -40,13 +53,12 @@ class PaletteGeneratorNotifier extends StateNotifier<PaletteGeneratorState> {
   }
 
   void regenerate() {
-    final colors = _generator.generate(seed: state.seed, count: state.count);
-    state = state.copyWith(colors: colors);
+    final rawColors = _generator.generate(seed: state.seed, count: state.count);
+    state = state.copyWith(rawColors: rawColors);
   }
-
-  String toHex(Color color) => _generator.toHex(color);
 }
 
-final paletteGeneratorProvider = StateNotifierProvider<PaletteGeneratorNotifier, PaletteGeneratorState>(
+final paletteGeneratorProvider =
+    StateNotifierProvider<PaletteGeneratorNotifier, PaletteGeneratorState>(
   (ref) => PaletteGeneratorNotifier(),
 );

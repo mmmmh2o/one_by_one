@@ -14,10 +14,12 @@ class PaletteGeneratorPage extends ConsumerStatefulWidget {
   const PaletteGeneratorPage({super.key});
 
   @override
-  ConsumerState<PaletteGeneratorPage> createState() => _PaletteGeneratorPageState();
+  ConsumerState<PaletteGeneratorPage> createState() =>
+      _PaletteGeneratorPageState();
 }
 
-class _PaletteGeneratorPageState extends ConsumerState<PaletteGeneratorPage> {
+class _PaletteGeneratorPageState
+    extends ConsumerState<PaletteGeneratorPage> {
   late final TextEditingController _seedController;
 
   @override
@@ -60,7 +62,10 @@ class _PaletteGeneratorPageState extends ConsumerState<PaletteGeneratorPage> {
                       Expanded(
                         child: Text(
                           '颜色数量：${state.count}',
-                          style: scaledTextStyle(Theme.of(context).textTheme.bodyMedium, ui.textScaleFactor),
+                          style: scaledTextStyle(
+                            Theme.of(context).textTheme.bodyMedium,
+                            ui.textScaleFactor,
+                          ),
                         ),
                       ),
                     ],
@@ -81,15 +86,18 @@ class _PaletteGeneratorPageState extends ConsumerState<PaletteGeneratorPage> {
             Expanded(
               child: ListView.separated(
                 itemCount: state.colors.length,
-                separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.sm),
+                separatorBuilder: (_, __) =>
+                    const SizedBox(height: AppSpacing.sm),
                 itemBuilder: (context, index) {
                   final color = state.colors[index];
-                  final hex = notifier.toHex(color);
+                  final hex = state.hexValues[index];
                   return AppCard(
                     onTap: () async {
                       await Clipboard.setData(ClipboardData(text: hex));
                       if (!context.mounted) return;
-                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('已复制 $hex')));
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('已复制 $hex')),
+                      );
                     },
                     child: Row(
                       children: [
@@ -99,14 +107,21 @@ class _PaletteGeneratorPageState extends ConsumerState<PaletteGeneratorPage> {
                           decoration: BoxDecoration(
                             color: color,
                             borderRadius: BorderRadius.circular(10),
-                            border: Border.all(color: Theme.of(context).dividerColor.withOpacity(0.2)),
+                            border: Border.all(
+                              color: Theme.of(context)
+                                  .dividerColor
+                                  .withValues(alpha: 0.2),
+                            ),
                           ),
                         ),
                         const SizedBox(width: AppSpacing.md),
                         Expanded(
                           child: Text(
                             hex,
-                            style: scaledTextStyle(Theme.of(context).textTheme.titleMedium, ui.textScaleFactor),
+                            style: scaledTextStyle(
+                              Theme.of(context).textTheme.titleMedium,
+                              ui.textScaleFactor,
+                            ),
                           ),
                         ),
                         const Icon(Icons.copy, size: 18),
