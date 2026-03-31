@@ -13,7 +13,7 @@ class FavoritesNotifier extends StateNotifier<Set<String>> {
 
   Future<void> _load() async {
     final prefs = await SharedPreferences.getInstance();
-    state = (prefs.getStringList(_key) ?? {}).toSet();
+    state = (prefs.getStringList(_key) ?? <String>[]).toSet();
   }
 
   Future<void> _save() async {

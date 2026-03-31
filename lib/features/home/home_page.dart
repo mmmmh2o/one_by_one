@@ -756,7 +756,7 @@ class _SettingsSheet extends ConsumerWidget {
 
     return DraggableScrollableSheet(
       expand: false,
-      maxChildHeight: 0.85,
+      maxChildSize: 0.85,
       builder: (ctx, scrollCtrl) => ListView(
         controller: scrollCtrl,
         padding: const EdgeInsets.fromLTRB(
