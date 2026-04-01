@@ -365,25 +365,28 @@ class _HomePageState extends ConsumerState<HomePage>
     final cols = settings.preferredColumns > 0
         ? settings.preferredColumns
         : (width > 1000 ? 4 : width > 720 ? 3 : 2);
+    final maxExtent = width / cols;
 
     return SliverPadding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      sliver: SliverGrid.builder(
-        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: cols,
-          crossAxisSpacing: 12,
+      sliver: SliverGrid(
+        gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+          maxCrossAxisExtent: maxExtent,
           mainAxisSpacing: 12,
+          crossAxisSpacing: 12,
           childAspectRatio: 1.15,
         ),
-        itemCount: tools.length,
-        itemBuilder: (_, i) => HomeToolGridCard(
-          tool: tools[i],
-          isFavorite: favIds.contains(tools[i].id),
-          showDescription: settings.showToolDescription,
-          iconScale: settings.iconScaleFactor,
-          cardRadius: settings.cardRadius,
-          onTap: () => _openTool(tools[i]),
-          onLongPress: () => _showToolSheet(tools[i]),
+        delegate: SliverChildBuilderDelegate(
+          (context, i) => HomeToolGridCard(
+            tool: tools[i],
+            isFavorite: favIds.contains(tools[i].id),
+            showDescription: settings.showToolDescription,
+            iconScale: settings.iconScaleFactor,
+            cardRadius: settings.cardRadius,
+            onTap: () => _openTool(tools[i]),
+            onLongPress: () => _showToolSheet(tools[i]),
+          ),
+          childCount: tools.length,
         ),
       ),
     );
