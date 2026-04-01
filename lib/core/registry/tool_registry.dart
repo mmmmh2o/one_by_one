@@ -11,6 +11,7 @@ import '../../features/level/level_page.dart';
 import '../../features/loan_calculator/loan_calculator_page.dart';
 import '../../features/qrcode/qrcode_page.dart';
 import '../../features/simplified_convert/simplified_convert_page.dart';
+import '../../features/speed_test/speed_test_page.dart';
 import '../../features/tax_calculator/tax_calculator_page.dart';
 import '../../features/bmi/bmi_page.dart';
 import '../../features/calculator/calculator_page.dart';
@@ -376,6 +377,16 @@ final List<ToolEntry> allTools = [
     builder: (_) => const SimplifiedConvertPage(),
     isOffline: true,
     sortOrder: 34,
+  ),
+  ToolEntry(
+    id: 'speed_test',
+    name: '网速测试',
+    description: '测量当前网络下载/上传带宽与延迟',
+    icon: Icons.network_check,
+    category: ToolCategory.daily,
+    builder: (_) => const SpeedTestPage(),
+    isOffline: false,
+    sortOrder: 35,
   ),
 ];
 

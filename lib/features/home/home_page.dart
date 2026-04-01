@@ -11,6 +11,7 @@ import 'package:toolbox/features/home/widgets/home_category_chips.dart';
 import 'package:toolbox/features/home/widgets/home_horizontal_tool_row.dart';
 import 'package:toolbox/features/home/widgets/home_search_bar.dart';
 import 'package:toolbox/features/home/widgets/home_tool_grid_card.dart';
+import 'package:toolbox/features/home/widgets/home_section_header.dart';
 import 'package:toolbox/features/home/widgets/home_tool_list_tile.dart';
 import 'package:toolbox/models/tool_entry.dart';
 
@@ -279,7 +280,7 @@ class _HomePageState extends ConsumerState<HomePage>
               SliverToBoxAdapter(
                 child: _animated(
                   animIdx++,
-                  _SectionHeader(
+                  SectionHeader(
                       title: '最近使用', icon: Icons.history_rounded),
                   enableAnim,
                 ),
@@ -303,7 +304,7 @@ class _HomePageState extends ConsumerState<HomePage>
               SliverToBoxAdapter(
                 child: _animated(
                   animIdx++,
-                  const _SectionHeader(
+                  const SectionHeader(
                       title: '我的收藏', icon: Icons.star_rounded),
                   enableAnim,
                 ),
@@ -328,7 +329,7 @@ class _HomePageState extends ConsumerState<HomePage>
                 SliverToBoxAdapter(
                   child: _animated(
                     animIdx++,
-                    _CategoryHeader(
+                    CategoryHeader(
                         cat: cat, count: grouped[cat]?.length ?? 0),
                     enableAnim,
                   ),
@@ -430,65 +431,4 @@ class _HomePageState extends ConsumerState<HomePage>
   }
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
-// Extracted header widgets (Stateless, no ref dependency)
-// ═══════════════════════════════════════════════════════════════════════════
-
-class _SectionHeader extends StatelessWidget {
-  final String title;
-  final IconData icon;
-  const _SectionHeader({required this.title, required this.icon});
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
-      child: Row(
-        children: [
-          Icon(icon, size: 18, color: Theme.of(context).colorScheme.primary),
-          const SizedBox(width: 6),
-          Text(title,
-              style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                  color: Theme.of(context).colorScheme.primary)),
-        ],
-      ),
-    );
-  }
-}
-
-class _CategoryHeader extends StatelessWidget {
-  final ToolCategory cat;
-  final int count;
-  const _CategoryHeader({required this.cat, required this.count});
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    final meta = kHomeCategories[cat];
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
-      child: Row(
-        children: [
-          Icon(meta?.$2 ?? Icons.apps_rounded, size: 18, color: cs.primary),
-          const SizedBox(width: 6),
-          Text(meta?.$1 ?? '其他',
-              style: Theme.of(context)
-                  .textTheme
-                  .titleSmall
-                  ?.copyWith(color: cs.primary, fontWeight: FontWeight.w600)),
-          const SizedBox(width: 6),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(10),
-              color: cs.primaryContainer.withValues(alpha: 0.5),
-            ),
-            child: Text('$count',
-                style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                    color: cs.onPrimaryContainer)),
-          ),
-        ],
-      ),
-    );
-  }
-}
+// ── Legacy private headers replaced by home_section_header.dart ──────
