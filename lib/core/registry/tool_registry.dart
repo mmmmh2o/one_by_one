@@ -6,7 +6,12 @@ import '../../features/compass/compass_page.dart';
 import '../../features/device_info/device_info_page.dart';
 import '../../features/flashlight/flashlight_page.dart';
 import '../../features/image_compress/image_compress_page.dart';
+import '../../features/led_banner/led_banner_page.dart';
+import '../../features/level/level_page.dart';
+import '../../features/loan_calculator/loan_calculator_page.dart';
 import '../../features/qrcode/qrcode_page.dart';
+import '../../features/simplified_convert/simplified_convert_page.dart';
+import '../../features/tax_calculator/tax_calculator_page.dart';
 import '../../features/bmi/bmi_page.dart';
 import '../../features/calculator/calculator_page.dart';
 import '../../features/coin/coin_page.dart';
@@ -321,6 +326,56 @@ final List<ToolEntry> allTools = [
     builder: (_) => const ImageCompressPage(),
     isOffline: true,
     sortOrder: 29,
+  ),
+  ToolEntry(
+    id: 'level',
+    name: '水平仪',
+    description: '利用加速度计检测桌面是否水平',
+    icon: Icons.bubble_chart,
+    category: ToolCategory.device,
+    builder: (_) => const LevelPage(),
+    isOffline: true,
+    sortOrder: 30,
+  ),
+  ToolEntry(
+    id: 'led_banner',
+    name: 'LED 弹幕',
+    description: '全屏滚动文字，支持速度与字号',
+    icon: Icons.developer_board,
+    category: ToolCategory.daily,
+    builder: (_) => const LedBannerPage(),
+    isOffline: true,
+    sortOrder: 31,
+  ),
+  ToolEntry(
+    id: 'loan_calculator',
+    name: '房贷计算',
+    description: '等额本息 / 等额本金房贷计算',
+    icon: Icons.home_work,
+    category: ToolCategory.calculator,
+    builder: (_) => const LoanCalculatorPage(),
+    isOffline: true,
+    sortOrder: 32,
+  ),
+  ToolEntry(
+    id: 'tax_calculator',
+    name: '个税计算',
+    description: '综合所得个人所得税计算',
+    icon: Icons.receipt_long,
+    category: ToolCategory.calculator,
+    builder: (_) => const TaxCalculatorPage(),
+    isOffline: true,
+    sortOrder: 33,
+  ),
+  ToolEntry(
+    id: 'simplified_convert',
+    name: '繁简转换',
+    description: '简体与繁体中文互转',
+    icon: Icons.translate,
+    category: ToolCategory.text,
+    builder: (_) => const SimplifiedConvertPage(),
+    isOffline: true,
+    sortOrder: 34,
   ),
 ];
 
