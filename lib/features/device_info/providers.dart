@@ -54,7 +54,6 @@ class DeviceInfoNotifier extends StateNotifier<DeviceInfoState> {
             label: 'CPU 架构',
             value: android.supportedAbis.join(', ')),
         DeviceInfoItem(label: '是否模拟器', value: android.isPhysicalDevice ? '否' : '是'),
-        DeviceInfoItem(label: '是否 Root', value: android.isRooted ? '是' : '否'),
       ];
       state = DeviceInfoState(items: items, loading: false);
     } catch (e) {

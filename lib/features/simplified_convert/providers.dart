@@ -32,7 +32,7 @@ class SimplifiedConvertNotifier
     extends StateNotifier<SimplifiedConvertState> {
   SimplifiedConvertNotifier() : super(const SimplifiedConvertState());
 
-  final _logic = const SimplifiedConvertLogic();
+  final _logic = SimplifiedConvertLogic();
 
   void setInput(String text) {
     state = state.copyWith(input: text);
