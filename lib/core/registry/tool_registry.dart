@@ -2,6 +2,11 @@ import 'package:flutter/material.dart';
 
 import '../../features/base64_codec/base64_codec_page.dart';
 import '../../features/base_converter/base_converter_page.dart';
+import '../../features/compass/compass_page.dart';
+import '../../features/device_info/device_info_page.dart';
+import '../../features/flashlight/flashlight_page.dart';
+import '../../features/image_compress/image_compress_page.dart';
+import '../../features/qrcode/qrcode_page.dart';
 import '../../features/bmi/bmi_page.dart';
 import '../../features/calculator/calculator_page.dart';
 import '../../features/coin/coin_page.dart';
@@ -266,6 +271,56 @@ final List<ToolEntry> allTools = [
     builder: (_) => const PaletteGeneratorPage(),
     isOffline: true,
     sortOrder: 24,
+  ),
+  ToolEntry(
+    id: 'qrcode',
+    name: '二维码',
+    description: '生成与扫描二维码',
+    icon: Icons.qr_code_2,
+    category: ToolCategory.daily,
+    builder: (_) => const QrcodePage(),
+    isOffline: false,
+    sortOrder: 25,
+  ),
+  ToolEntry(
+    id: 'compass',
+    name: '指南针',
+    description: '实时方位指示与磁场检测',
+    icon: Icons.explore,
+    category: ToolCategory.device,
+    builder: (_) => const CompassPage(),
+    isOffline: true,
+    sortOrder: 26,
+  ),
+  ToolEntry(
+    id: 'flashlight',
+    name: '手电筒',
+    description: '开关手电筒照明',
+    icon: Icons.flashlight_on_rounded,
+    category: ToolCategory.device,
+    builder: (_) => const FlashlightPage(),
+    isOffline: true,
+    sortOrder: 27,
+  ),
+  ToolEntry(
+    id: 'device_info',
+    name: '设备信息',
+    description: '查看手机硬件与系统信息',
+    icon: Icons.phone_android_rounded,
+    category: ToolCategory.device,
+    builder: (_) => const DeviceInfoPage(),
+    isOffline: true,
+    sortOrder: 28,
+  ),
+  ToolEntry(
+    id: 'image_compress',
+    name: '图片压缩',
+    description: '调整质量与尺寸压缩图片',
+    icon: Icons.compress,
+    category: ToolCategory.image,
+    builder: (_) => const ImageCompressPage(),
+    isOffline: true,
+    sortOrder: 29,
   ),
 ];
 
