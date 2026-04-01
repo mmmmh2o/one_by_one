@@ -23,7 +23,7 @@ final _viewModeProvider = StateProvider<_ViewMode>((_) => _ViewMode.grid);
 enum _ViewMode { grid, list }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// HomePage — 编排层，只做组合，不做具体实现
+// HomePage
 // ═══════════════════════════════════════════════════════════════════════════
 
 class HomePage extends ConsumerStatefulWidget {
@@ -36,20 +36,22 @@ class HomePage extends ConsumerStatefulWidget {
 class _HomePageState extends ConsumerState<HomePage>
     with SingleTickerProviderStateMixin {
   late final HomeAnimations _anim;
+  bool _animReady = false;
 
   @override
   void initState() {
     super.initState();
     _anim = HomeAnimations(vsync: this);
-    final enableAnim =
-        ref.read(settingsProvider).enableAnimations;
-    if (enableAnim) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) _anim.controller.forward();
-      });
-    } else {
-      _anim.controller.value = 1.0;
-    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final enableAnim = ref.read(settingsProvider).enableAnimations;
+      if (enableAnim) {
+        _anim.controller.forward();
+      } else {
+        _anim.controller.value = 1.0;
+      }
+      setState(() => _animReady = true);
+    });
   }
 
   @override
@@ -86,8 +88,7 @@ class _HomePageState extends ConsumerState<HomePage>
               child: Icon(tool.icon, size: 32, color: cs.onPrimaryContainer),
             ),
             const SizedBox(height: AppSpacing.sm),
-            Text(tool.name,
-                style: Theme.of(context).textTheme.titleMedium),
+            Text(tool.name, style: Theme.of(context).textTheme.titleMedium),
             const SizedBox(height: AppSpacing.xs),
             Text(tool.description,
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -117,10 +118,9 @@ class _HomePageState extends ConsumerState<HomePage>
     );
   }
 
-  /// 包裹缩放+淡入动画
-  Widget _animated(int index, Widget child) {
-    final settings = ref.watch(settingsProvider);
-    if (!settings.enableAnimations) return child;
+  /// 包裹缩放+淡入动画（不依赖 ref，安全用于 sliver 中）
+  Widget _animated(int index, Widget child, bool enableAnimations) {
+    if (!enableAnimations || !_animReady) return child;
     return AnimatedBuilder(
       animation: _anim.controller,
       builder: (context, _) => Transform.scale(
@@ -147,6 +147,7 @@ class _HomePageState extends ConsumerState<HomePage>
     final favIds = ref.watch(favoritesProvider);
     final recentIds = ref.watch(recentToolsProvider);
     final settings = ref.watch(settingsProvider);
+    final enableAnim = settings.enableAnimations;
 
     // ── Filtering ──────────────────────────────────────────────────
     final filtered = allTools.where((t) {
@@ -190,7 +191,7 @@ class _HomePageState extends ConsumerState<HomePage>
     return Scaffold(
       body: RefreshIndicator(
         onRefresh: () async {
-          if (settings.enableAnimations) {
+          if (enableAnim) {
             _anim.controller.reset();
             _anim.controller.forward();
           }
@@ -200,10 +201,11 @@ class _HomePageState extends ConsumerState<HomePage>
               parent: AlwaysScrollableScrollPhysics()),
           slivers: [
             // ── App bar ────────────────────────────────────────────
-            SliverAppBar.large(
+            SliverAppBar(
               title: const Text('工具箱'),
               centerTitle: true,
-              automaticallyImplyLeading: false,
+              floating: true,
+              snap: true,
               actions: [
                 IconButton(
                   tooltip:
@@ -221,149 +223,121 @@ class _HomePageState extends ConsumerState<HomePage>
             ),
 
             // ── Search ─────────────────────────────────────────────
-            _animated(animIdx++,
+            SliverToBoxAdapter(
+              child: _animated(
+                animIdx++,
                 HomeSearchBar(
                   onChanged: (v) =>
                       ref.read(_searchQueryProvider.notifier).state = v,
-                )),
+                ),
+                enableAnim,
+              ),
+            ),
             const SliverToBoxAdapter(child: SizedBox(height: 8)),
 
             // ── Category chips ─────────────────────────────────────
-            _animated(
+            SliverToBoxAdapter(
+              child: _animated(
                 animIdx++,
-                SliverToBoxAdapter(
-                  child: HomeCategoryChips(
-                    selected: selectedCat,
-                    onSelected: (cat) => ref
-                        .read(_selectedCategoryProvider.notifier)
-                        .state = cat,
-                  ),
-                )),
+                HomeCategoryChips(
+                  selected: selectedCat,
+                  onSelected: (cat) => ref
+                      .read(_selectedCategoryProvider.notifier)
+                      .state = cat,
+                ),
+                enableAnim,
+              ),
+            ),
             const SliverToBoxAdapter(child: SizedBox(height: 4)),
 
             // ── Tool count (when filtering) ────────────────────────
             if (selectedCat != null || query.isNotEmpty)
               SliverToBoxAdapter(
                 child: _animated(
-                    animIdx++,
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 20, vertical: 4),
-                      child: Text(
-                        '${filtered.length} 个工具',
-                        style: Theme.of(context)
-                            .textTheme
-                            .labelMedium
-                            ?.copyWith(
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .onSurfaceVariant,
-                            ),
-                      ),
-                    )),
+                  animIdx++,
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 20, vertical: 4),
+                    child: Text(
+                      '${filtered.length} 个工具',
+                      style: Theme.of(context)
+                          .textTheme
+                          .labelMedium
+                          ?.copyWith(
+                            color: Theme.of(context)
+                                .colorScheme
+                                .onSurfaceVariant,
+                          ),
+                    ),
+                  ),
+                  enableAnim,
+                ),
               ),
 
             // ── Recent tools (horizontal) ──────────────────────────
             if (showRecents) ...[
-              _animated(
+              SliverToBoxAdapter(
+                child: _animated(
                   animIdx++,
-                  _sectionHeader(context, '最近使用', Icons.history_rounded)),
-              _animated(
+                  _SectionHeader(
+                      title: '最近使用', icon: Icons.history_rounded),
+                  enableAnim,
+                ),
+              ),
+              SliverToBoxAdapter(
+                child: _animated(
                   animIdx++,
-                  SliverToBoxAdapter(
-                    child: HomeHorizontalToolRow(
-                      tools: recentTools,
-                      iconScale: settings.iconScaleFactor,
-                      onTap: _openTool,
-                    ),
-                  )),
+                  HomeHorizontalToolRow(
+                    tools: recentTools,
+                    iconScale: settings.iconScaleFactor,
+                    onTap: _openTool,
+                  ),
+                  enableAnim,
+                ),
+              ),
             ],
 
             // ── Favorites (horizontal) ─────────────────────────────
             if (showFavorites) ...[
-              _animated(
+              SliverToBoxAdapter(
+                child: _animated(
                   animIdx++,
-                  _sectionHeader(
-                      context, '我的收藏', Icons.star_rounded)),
-              _animated(
+                  const _SectionHeader(
+                      title: '我的收藏', icon: Icons.star_rounded),
+                  enableAnim,
+                ),
+              ),
+              SliverToBoxAdapter(
+                child: _animated(
                   animIdx++,
-                  SliverToBoxAdapter(
-                    child: HomeHorizontalToolRow(
-                      tools: favoriteTools,
-                      iconScale: settings.iconScaleFactor,
-                      onTap: _openTool,
-                    ),
-                  )),
+                  HomeHorizontalToolRow(
+                    tools: favoriteTools,
+                    iconScale: settings.iconScaleFactor,
+                    onTap: _openTool,
+                  ),
+                  enableAnim,
+                ),
+              ),
             ],
 
             // ── Grouped categories ─────────────────────────────────
             if (isGrouped)
               for (final cat in visibleCategories) ...[
-                _animated(
+                SliverToBoxAdapter(
+                  child: _animated(
                     animIdx++,
-                    _categorySliverHeader(
-                        context, cat, grouped[cat]?.length ?? 0)),
+                    _CategoryHeader(
+                        cat: cat, count: grouped[cat]?.length ?? 0),
+                    enableAnim,
+                  ),
+                ),
                 _buildGrid(context, grouped[cat] ?? [], favIds, settings),
               ]
             else
               _buildContent(
-                  context, filtered, favIds, viewMode, settings, animIdx),
+                  context, filtered, favIds, viewMode, settings),
 
             const SliverToBoxAdapter(child: SizedBox(height: 32)),
-          ],
-        ),
-      ),
-    );
-  }
-
-  // ── Section header ──────────────────────────────────────────────────
-  SliverToBoxAdapter _sectionHeader(
-      BuildContext context, String title, IconData icon) {
-    return SliverToBoxAdapter(
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
-        child: Row(
-          children: [
-            Icon(icon, size: 18,
-                color: Theme.of(context).colorScheme.primary),
-            const SizedBox(width: 6),
-            Text(title,
-                style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                    color: Theme.of(context).colorScheme.primary)),
-          ],
-        ),
-      ),
-    );
-  }
-
-  // ── Category header ─────────────────────────────────────────────────
-  SliverToBoxAdapter _categorySliverHeader(
-      BuildContext context, ToolCategory cat, int count) {
-    final cs = Theme.of(context).colorScheme;
-    final meta = kHomeCategories[cat];
-    return SliverToBoxAdapter(
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
-        child: Row(
-          children: [
-            Icon(meta?.$2 ?? Icons.apps_rounded, size: 18, color: cs.primary),
-            const SizedBox(width: 6),
-            Text(meta?.$1 ?? '其他',
-                style: Theme.of(context)
-                    .textTheme
-                    .titleSmall
-                    ?.copyWith(color: cs.primary, fontWeight: FontWeight.w600)),
-            const SizedBox(width: 6),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10),
-                color: cs.primaryContainer.withValues(alpha: 0.5),
-              ),
-              child: Text('$count',
-                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                      color: cs.onPrimaryContainer)),
-            ),
           ],
         ),
       ),
@@ -377,7 +351,6 @@ class _HomePageState extends ConsumerState<HomePage>
     Set<String> favIds,
     _ViewMode viewMode,
     SettingsState settings,
-    int animIdx,
   ) {
     if (tools.isEmpty) return _emptyState(context);
     return viewMode == _ViewMode.grid
@@ -394,13 +367,13 @@ class _HomePageState extends ConsumerState<HomePage>
         : (width > 1000 ? 4 : width > 720 ? 3 : 2);
 
     return SliverPadding(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       sliver: SliverGrid.builder(
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: cols,
           crossAxisSpacing: 12,
           mainAxisSpacing: 12,
-          childAspectRatio: width < 420 ? 1.0 : 1.15,
+          childAspectRatio: 1.15,
         ),
         itemCount: tools.length,
         itemBuilder: (_, i) => HomeToolGridCard(
@@ -447,6 +420,69 @@ class _HomePageState extends ConsumerState<HomePage>
                     color: Theme.of(context).colorScheme.outline)),
           ],
         ),
+      ),
+    );
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Extracted header widgets (Stateless, no ref dependency)
+// ═══════════════════════════════════════════════════════════════════════════
+
+class _SectionHeader extends StatelessWidget {
+  final String title;
+  final IconData icon;
+  const _SectionHeader({required this.title, required this.icon});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
+      child: Row(
+        children: [
+          Icon(icon, size: 18, color: Theme.of(context).colorScheme.primary),
+          const SizedBox(width: 6),
+          Text(title,
+              style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                  color: Theme.of(context).colorScheme.primary)),
+        ],
+      ),
+    );
+  }
+}
+
+class _CategoryHeader extends StatelessWidget {
+  final ToolCategory cat;
+  final int count;
+  const _CategoryHeader({required this.cat, required this.count});
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final meta = kHomeCategories[cat];
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+      child: Row(
+        children: [
+          Icon(meta?.$2 ?? Icons.apps_rounded, size: 18, color: cs.primary),
+          const SizedBox(width: 6),
+          Text(meta?.$1 ?? '其他',
+              style: Theme.of(context)
+                  .textTheme
+                  .titleSmall
+                  ?.copyWith(color: cs.primary, fontWeight: FontWeight.w600)),
+          const SizedBox(width: 6),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(10),
+              color: cs.primaryContainer.withValues(alpha: 0.5),
+            ),
+            child: Text('$count',
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    color: cs.onPrimaryContainer)),
+          ),
+        ],
       ),
     );
   }

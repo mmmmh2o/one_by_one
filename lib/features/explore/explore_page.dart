@@ -43,10 +43,11 @@ class _ExplorePageState extends ConsumerState<ExplorePage> {
 
     return CustomScrollView(
       slivers: [
-        SliverAppBar.large(
+        SliverAppBar(
           title: const Text('分类'),
           centerTitle: true,
-          automaticallyImplyLeading: false,
+          floating: true,
+          snap: true,
         ),
         // 分类 chips
         SliverToBoxAdapter(
