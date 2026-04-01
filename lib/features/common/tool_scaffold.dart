@@ -51,22 +51,38 @@ class ToolScaffold extends ConsumerWidget {
       children: children,
     );
 
-    final body = scrollable
-        ? SingleChildScrollView(
-            padding: const EdgeInsets.all(AppSpacing.md),
-            child: content,
-          )
-        : Padding(
-            padding: const EdgeInsets.all(AppSpacing.md),
-            child: content,
-          );
+    Widget body;
+    if (scrollable) {
+      body = SingleChildScrollView(
+        padding: const EdgeInsets.all(AppSpacing.md),
+        child: content,
+      );
+    } else if (expandBody) {
+      // 需要 Expanded 子组件时，外层用 Column 包裹并用 Expanded 扩展中间区域
+      body = Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.all(AppSpacing.md),
+              child: content,
+            ),
+          ),
+        ],
+      );
+    } else {
+      body = Padding(
+        padding: const EdgeInsets.all(AppSpacing.md),
+        child: content,
+      );
+    }
 
     return Scaffold(
       appBar: AppBar(
         title: Text(title),
         actions: appBarActions,
       ),
-      body: expandBody ? Expanded(child: body) : body,
+      body: body,
     );
   }
 }

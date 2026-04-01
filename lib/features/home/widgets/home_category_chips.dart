@@ -5,6 +5,8 @@ const kHomeCategories = <ToolCategory, (String label, IconData icon)>{
   ToolCategory.daily: ('日常', Icons.wb_sunny_outlined),
   ToolCategory.calculator: ('计算', Icons.calculate_outlined),
   ToolCategory.text: ('文本', Icons.text_snippet_outlined),
+  ToolCategory.device: ('设备', Icons.phone_android_rounded),
+  ToolCategory.image: ('图片', Icons.image_outlined),
   ToolCategory.other: ('趣味', Icons.auto_awesome_outlined),
   ToolCategory.thirdParty: ('高级', Icons.extension_outlined),
 };

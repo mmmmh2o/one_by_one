@@ -126,7 +126,7 @@ class _LedBannerPageState extends ConsumerState<LedBannerPage> {
                   AnimatedPositioned(
                     duration: const Duration(milliseconds: 16),
                     left: state.scrolling
-                        ? -state.scrollOffset % (_textWidth(state.text) + 320)
+                        ? -state.scrollOffset % (_textWidth(state.text, notifier.fontSizePx) + 320)
                         : 0,
                     child: Center(
                       child: Text(
@@ -156,11 +156,11 @@ class _LedBannerPageState extends ConsumerState<LedBannerPage> {
     );
   }
 
-  double _textWidth(String text) {
+  double _textWidth(String text, double fontSize) {
     final tp = TextPainter(
       text: TextSpan(
         text: text,
-        style: const TextStyle(fontSize: 48, fontWeight: FontWeight.bold),
+        style: TextStyle(fontSize: fontSize, fontWeight: FontWeight.bold),
       ),
       textDirection: TextDirection.ltr,
     )..layout();
