@@ -31,6 +31,22 @@ class App extends ConsumerWidget {
           themeMode: settings.themeMode,
           locale: settings.locale,
           routerConfig: router,
+          builder: (context, child) {
+            // 全局应用文字缩放
+            final mq = MediaQuery.of(context);
+            final scaled = mq.copyWith(
+              textScaler: TextScaler.linear(settings.textScaleFactor),
+            );
+            return MediaQuery(
+              data: scaled,
+              child: IconTheme(
+                data: IconThemeData(
+                  size: 24 * settings.iconScaleFactor,
+                ),
+                child: child!,
+              ),
+            );
+          },
         );
       },
     );

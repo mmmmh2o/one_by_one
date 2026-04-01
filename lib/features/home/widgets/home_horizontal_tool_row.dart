@@ -6,12 +6,14 @@ import 'package:toolbox/models/tool_entry.dart';
 class HomeHorizontalToolRow extends StatelessWidget {
   final List<ToolEntry> tools;
   final double iconScale;
+  final double cardRadius;
   final ValueChanged<ToolEntry> onTap;
 
   const HomeHorizontalToolRow({
     super.key,
     required this.tools,
     this.iconScale = 1.0,
+    this.cardRadius = 14,
     required this.onTap,
   });
 
@@ -35,7 +37,7 @@ class HomeHorizontalToolRow extends StatelessWidget {
               width: 108,
               padding: const EdgeInsets.all(AppSpacing.sm),
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(14),
+                borderRadius: BorderRadius.circular(cardRadius),
                 color: cs.surfaceContainerLow,
                 border: Border.all(
                   color: cs.outlineVariant.withValues(alpha: 0.4),

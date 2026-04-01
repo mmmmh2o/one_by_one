@@ -137,6 +137,7 @@ abstract class AppTheme {
   static ThemeData dark(SettingsState settings, {ColorScheme? monetScheme}) {
     final seed = _accentColor(settings.accent);
     final compact = settings.density == UiDensity.compact;
+    final contrast = settings.highContrast;
     final colorScheme = monetScheme ?? ColorScheme.fromSeed(
       seedColor: seed,
       brightness: Brightness.dark,
@@ -167,6 +168,12 @@ abstract class AppTheme {
         surfaceTintColor: colorScheme.surfaceTint,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(settings.cardRadius),
+          side: BorderSide(
+            color: contrast
+                ? colorScheme.primary
+                : colorScheme.outlineVariant.withOpacity(0.5),
+            width: contrast ? 1.5 : 0.5,
+          ),
         ),
       ),
 

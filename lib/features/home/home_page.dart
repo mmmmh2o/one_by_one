@@ -290,6 +290,7 @@ class _HomePageState extends ConsumerState<HomePage>
                   HomeHorizontalToolRow(
                     tools: recentTools,
                     iconScale: settings.iconScaleFactor,
+                    cardRadius: settings.cardRadius,
                     onTap: _openTool,
                   ),
                   enableAnim,
@@ -313,6 +314,7 @@ class _HomePageState extends ConsumerState<HomePage>
                   HomeHorizontalToolRow(
                     tools: favoriteTools,
                     iconScale: settings.iconScaleFactor,
+                    cardRadius: settings.cardRadius,
                     onTap: _openTool,
                   ),
                   enableAnim,
