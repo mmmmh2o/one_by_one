@@ -31,7 +31,7 @@ dependencies:
   package_info_plus: ^8.0.0
   flutter_tts: ^3.0.0
   dynamic_color: ^1.7.0
-  torch_light: ^0.3.0
+  torch_light: ^1.1.0
   device_info_plus: ^11.0.0
 
 dev_dependencies:
