@@ -1,7 +1,11 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:torch_light/torch_light.dart';
 
 import 'logic/flashlight_logic.dart';
+
+// 条件导入：Web 端用 stub，移动端用 torch_light
+import 'providers_stub.dart'
+    if (dart.library.io) 'providers_mobile.dart'
+    if (dart.library.html) 'providers_stub.dart';
 
 class FlashlightState {
   final FlashlightStatus status;
@@ -18,12 +22,9 @@ class FlashlightNotifier extends StateNotifier<FlashlightState> {
     _checkSupport();
   }
 
-  final _logic = const FlashlightLogic();
-
   Future<void> _checkSupport() async {
-    try {
-      await TorchLight.isTorchAvailable();
-    } catch (_) {
+    final supported = await platformIsTorchAvailable();
+    if (!supported) {
       state = state.copyWith(status: FlashlightStatus.unsupported);
     }
   }
@@ -33,10 +34,10 @@ class FlashlightNotifier extends StateNotifier<FlashlightState> {
 
     try {
       if (state.status == FlashlightStatus.off) {
-        await TorchLight.enableTorch();
+        await platformEnableTorch();
         state = state.copyWith(status: FlashlightStatus.on);
       } else {
-        await TorchLight.disableTorch();
+        await platformDisableTorch();
         state = state.copyWith(status: FlashlightStatus.off);
       }
     } catch (_) {
