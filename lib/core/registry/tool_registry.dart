@@ -43,6 +43,7 @@ import '../../features/tax_calculator/tax_calculator_page.dart' deferred as tax_
 import '../../features/simplified_convert/simplified_convert_page.dart' deferred as simplified_convert;
 import '../../features/speed_test/speed_test_page.dart' deferred as speed_test;
 import '../../features/code_formatter/code_formatter_page.dart' deferred as code_formatter;
+import '../../features/protractor/protractor_page.dart' deferred as protractor;
 import '../../features/text_encrypt/text_encrypt_page.dart' deferred as text_encrypt;
 
 // ── Helper: 构造延迟加载的 builder ──────────────────────────────────────
@@ -468,6 +469,17 @@ final List<ToolEntry> allTools = [
     loadLibrary: code_formatter.loadLibrary,
     isOffline: true,
     sortOrder: 37,
+  ),
+  ToolEntry(
+    id: 'protractor',
+    name: '量角器',
+    description: '实时测量手机倾斜角度',
+    icon: Icons.architecture,
+    category: ToolCategory.device,
+    builder: _deferred(protractor.loadLibrary, () => protractor.ProtractorPage()),
+    loadLibrary: protractor.loadLibrary,
+    isOffline: true,
+    sortOrder: 38,
   ),
 ];
 
