@@ -42,6 +42,7 @@ import '../../features/loan_calculator/loan_calculator_page.dart' deferred as lo
 import '../../features/tax_calculator/tax_calculator_page.dart' deferred as tax_calculator;
 import '../../features/simplified_convert/simplified_convert_page.dart' deferred as simplified_convert;
 import '../../features/speed_test/speed_test_page.dart' deferred as speed_test;
+import '../../features/text_encrypt/text_encrypt_page.dart' deferred as text_encrypt;
 
 // ── Helper: 构造延迟加载的 builder ──────────────────────────────────────
 
@@ -444,6 +445,17 @@ final List<ToolEntry> allTools = [
     loadLibrary: speed_test.loadLibrary,
     isOffline: false,
     sortOrder: 35,
+  ),
+  ToolEntry(
+    id: 'text_encrypt',
+    name: '文字加密',
+    description: 'Base64/ROT13/凯撒密码等加密解密',
+    icon: Icons.enhanced_encryption,
+    category: ToolCategory.text,
+    builder: _deferred(text_encrypt.loadLibrary, () => text_encrypt.TextEncryptPage()),
+    loadLibrary: text_encrypt.loadLibrary,
+    isOffline: true,
+    sortOrder: 36,
   ),
 ];
 
