@@ -44,6 +44,7 @@ import '../../features/simplified_convert/simplified_convert_page.dart' deferred
 import '../../features/speed_test/speed_test_page.dart' deferred as speed_test;
 import '../../features/code_formatter/code_formatter_page.dart' deferred as code_formatter;
 import '../../features/protractor/protractor_page.dart' deferred as protractor;
+import '../../features/dark_mode_check/dark_mode_check_page.dart' deferred as dark_mode_check;
 import '../../features/text_encrypt/text_encrypt_page.dart' deferred as text_encrypt;
 
 // ── Helper: 构造延迟加载的 builder ──────────────────────────────────────
@@ -480,6 +481,17 @@ final List<ToolEntry> allTools = [
     loadLibrary: protractor.loadLibrary,
     isOffline: true,
     sortOrder: 38,
+  ),
+  ToolEntry(
+    id: 'dark_mode_check',
+    name: '色彩检测',
+    description: 'WCAG 对比度检测与深色模式分析',
+    icon: Icons.contrast,
+    category: ToolCategory.daily,
+    builder: _deferred(dark_mode_check.loadLibrary, () => dark_mode_check.DarkModeCheckPage()),
+    loadLibrary: dark_mode_check.loadLibrary,
+    isOffline: true,
+    sortOrder: 39,
   ),
 ];
 
