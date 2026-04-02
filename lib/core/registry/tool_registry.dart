@@ -42,6 +42,7 @@ import '../../features/loan_calculator/loan_calculator_page.dart' deferred as lo
 import '../../features/tax_calculator/tax_calculator_page.dart' deferred as tax_calculator;
 import '../../features/simplified_convert/simplified_convert_page.dart' deferred as simplified_convert;
 import '../../features/speed_test/speed_test_page.dart' deferred as speed_test;
+import '../../features/code_formatter/code_formatter_page.dart' deferred as code_formatter;
 import '../../features/text_encrypt/text_encrypt_page.dart' deferred as text_encrypt;
 
 // ── Helper: 构造延迟加载的 builder ──────────────────────────────────────
@@ -456,6 +457,17 @@ final List<ToolEntry> allTools = [
     loadLibrary: text_encrypt.loadLibrary,
     isOffline: true,
     sortOrder: 36,
+  ),
+  ToolEntry(
+    id: 'code_formatter',
+    name: '代码格式化',
+    description: 'JSON/HTML/CSS/JS 格式化与压缩',
+    icon: Icons.code,
+    category: ToolCategory.text,
+    builder: _deferred(code_formatter.loadLibrary, () => code_formatter.CodeFormatterPage()),
+    loadLibrary: code_formatter.loadLibrary,
+    isOffline: true,
+    sortOrder: 37,
   ),
 ];
 
